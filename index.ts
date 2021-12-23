@@ -1,4 +1,4 @@
-import func from "./days/16a";
+import func from "./days/16b";
 import {performance} from "perf_hooks";
 
 const startTime = performance.now();

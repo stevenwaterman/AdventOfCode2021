@@ -11,14 +11,25 @@ type Packet = LiteralPacket | OperatorPacket;
 export default function() {
   const bits: Bits = input.trim().split("").flatMap(char => parseInt(char, 16).toString(2).padStart(4, "0").split("")).map(char => char === "1" ? 1 : 0);
   const outerPacket = readPacket(bits, 0);
-  console.log(versionSum(outerPacket));
+  console.log(getValue(outerPacket));
 }
 
-function versionSum(packet: Packet): number {
-  if (packet.type === 4) {
-    return packet.version;
-  } else {
-    return packet.subPackets.map(sub => versionSum(sub)).reduce((a,b) => a+b, packet.version);
+function getValue(packet: Packet): number {
+  switch (packet.type) {
+    case 0: return packet.subPackets.map(sub => getValue(sub)).reduce((a,b) => a + b, 0);
+    case 1: return packet.subPackets.map(sub => getValue(sub)).reduce((a,b) => a * b, 1);
+    case 2: return packet.subPackets.map(sub => getValue(sub)).reduce((a,b) => a < b ? a : b);
+    case 3: return packet.subPackets.map(sub => getValue(sub)).reduce((a,b) => a > b ? a : b);
+    case 4: return packet.value;
+    case 5: 
+      const gtValues = packet.subPackets.map(sub => getValue(sub));
+      return gtValues[0] > gtValues[1] ? 1 : 0;
+    case 6: 
+      const ltValues = packet.subPackets.map(sub => getValue(sub));
+      return ltValues[0] < ltValues[1] ? 1 : 0;
+    case 7:
+      const eqValues = packet.subPackets.map(sub => getValue(sub));
+      return eqValues[0] === eqValues[1] ? 1 : 0;
   }
 }
 
